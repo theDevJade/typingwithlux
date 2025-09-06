@@ -1,4 +1,4 @@
-package com.thedevjade.typingwithlux.dialogue.entries
+﻿package com.thedevjade.typingwithlux.dialogue.entries
 
 import com.typewritermc.core.books.pages.Colors
 import com.typewritermc.core.entries.Ref
@@ -16,23 +16,27 @@ import com.typewritermc.engine.paper.entry.TriggerableEntry
 import com.typewritermc.engine.paper.entry.dialogue.DialogueMessenger
 import com.typewritermc.engine.paper.entry.entries.ConstVar
 import com.typewritermc.engine.paper.entry.entries.DialogueEntry
+import com.typewritermc.engine.paper.entry.entries.EntryTrigger
+import com.typewritermc.engine.paper.entry.entries.EventTrigger
 import com.typewritermc.engine.paper.entry.entries.SpeakerEntry
 import com.typewritermc.engine.paper.entry.entries.Var
 import org.bukkit.entity.Player
 import kotlin.time.Duration
 
-@Entry("lux_dialogue_message", "A regular LuxDialogue that does not contain options", Colors.BLUE, "material-symbols:chat-rounded")
-class RegularLuxDialogueEntry(
+@Entry("lux_dialogue_options", "A LuxDialogues message that contains options", Colors.BLUE, "material-symbols:chat-rounded")
+class OptionsLuxDialogueEntry(
     override val id: String = "",
     override val name: String = "",
     override val criteria: List<Criteria> = emptyList(),
     override val modifiers: List<Modifier> = emptyList(),
     override val triggers: List<Ref<TriggerableEntry>> = emptyList(),
     override val speaker: Ref<SpeakerEntry> = emptyRef(),
-    @MultiLine
     @Placeholder
-    @Help("The text to display to the player.")
+    @MultiLine
+    @Help("The text for the options.")
     val text: String = "",
+    @Help("The options for this lux dialogue.")
+    val options: List<LuxOption> = emptyList(),
     @Help("The duration it takes to type out the message. If the duration is zero, the message will be displayed instantly.")
     val duration: Var<java.time.Duration> = ConstVar(java.time.Duration.ZERO),
 ) : DialogueEntry {
@@ -40,6 +44,19 @@ class RegularLuxDialogueEntry(
     override fun messenger(player: Player, context: InteractionContext): DialogueMessenger<*>? {
         // You can use if statements to return a different messenger depending on different conditions
 
-        return RegularLuxDialogueHandler(player, context, this)
+        return OptionsLuxDialogueHandler(player, context, this)
     }
+}
+
+data class LuxOption(
+    @Help("Text for this option.")
+    val text: Var<String> = ConstVar(""),
+    @Help("The criteria that must be met for this option to show.")
+    val criteria: List<Criteria> = emptyList(),
+    @Help("The modifiers to apply when this option is chosen.")
+    val modifiers: List<Modifier> = emptyList(),
+    @Help("The triggers to fire when this option is chosen.")
+    val triggers: List<Ref<TriggerableEntry>> = emptyList()
+) {
+    val eventTriggers: List<EventTrigger> get() = triggers.map(::EntryTrigger)
 }
